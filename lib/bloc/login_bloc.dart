@@ -1,34 +1,66 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login_bloc/auth/auth_repository.dart';
-import 'package:login_bloc/bloc/form_submission_status.dart';
 import 'package:login_bloc/bloc/login_event.dart';
 import 'package:login_bloc/bloc/login_state.dart';
+import 'package:http/http.dart' as http;
+
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final AuthRepository authRepo;
 
-  LoginBloc({required this.authRepo}) : super(LoginState());
+  LoginBloc() : super(const LoginState()){
+    on<EmailChanged>(_onEmailChanged);
+    on<PasswordChanged>(_onPasswordChanged);
+    on<LoginApi>(_loginApi);
+  }
 
-  @override
-  Stream<LoginState> mapEventToState(LoginEvent event) async* {
-    // Username updated
-    if (event is LoginUsernameChanged) {
-      yield state.copyWith(username: event.username);
+  void _onEmailChanged(EmailChanged event, Emitter<LoginState> emit){
+    emit(
+      state.copyWith(email: event.email)
+    );
 
-      // Password updated
-    } else if (event is LoginPasswordChanged) {
-      yield state.copyWith(password: event.password);
+  }
 
-      // Form submitted
-    } else if (event is LoginSubmitted) {
-      yield state.copyWith(formStatus: FormSubmitting());
+  void _onPasswordChanged(PasswordChanged event, Emitter<LoginState> emit){
+    emit(
+      state.copyWith(password: event.password)
+    );
+  }
 
-      try {
-        await authRepo.login();
-        yield state.copyWith(formStatus: SubmissionSuccess());
-      } catch (e) {
-        yield state.copyWith(formStatus: SubmissionFailed(e as Exception));
+  void _loginApi(LoginApi event, Emitter<LoginState> emit) async {
+    emit(
+      state.copyWith(
+        loginStatus: LoginStatus.loading,
+      ),
+    );
+    Map data = {'email': state.email, 'password': state.password};
+
+    try {
+      final response = await http.post(Uri.parse('https://reqres.in/api/login'), body: data);
+      var data1 = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        emit(
+          state.copyWith(
+            loginStatus: LoginStatus.success,
+            message: 'Login successful',
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            loginStatus: LoginStatus.error,
+            message: data1['error'],
+          ),
+        );
       }
+    } catch (e) {
+      emit(
+        state.copyWith(
+          loginStatus: LoginStatus.error,
+          message: e.toString(),
+        ),
+      );
     }
   }
+
 }

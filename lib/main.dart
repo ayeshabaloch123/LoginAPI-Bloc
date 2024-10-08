@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login_bloc/auth/auth_repository.dart';
+import 'package:login_bloc/bloc/login_bloc.dart';
 import 'package:login_bloc/constants.dart';
 import 'package:login_bloc/screens/login_screen.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +39,8 @@ class MyApp extends StatelessWidget {
               borderSide: BorderSide.none,
             ),
           )),
-      home: RepositoryProvider(
-        create: (context) => AuthRepository(),
+      home: BlocProvider(
+        create: (context) => LoginBloc(),
         child: LoginScreen(),
       ),
     );

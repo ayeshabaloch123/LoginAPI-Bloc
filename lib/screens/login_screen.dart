@@ -1,36 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login_bloc/auth/auth_repository.dart';
 import 'package:login_bloc/bloc/login_bloc.dart';
 import 'package:login_bloc/responsive.dart';
 import 'package:login_bloc/screens/components/background.dart';
 import 'package:login_bloc/screens/components/login_form.dart';
 import 'package:login_bloc/screens/components/login_screen_image.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late LoginBloc _loginBloc;
+
+  @override
+  void initState(){
+    super.initState();
+    _loginBloc = LoginBloc();
+  }
+
+  @override
+  void dispose() {
+    _loginBloc.close();
+    super.dispose();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
-    return Background(
-      child: SingleChildScrollView(
-        child: Responsive(
-          mobile: BlocProvider(
-            create: (context) => LoginBloc(
-              authRepo: context.read<AuthRepository>(),
-            ),
-            child: const MobileLoginScreen(),
-          ),
-          desktop: Row(
-            children: [
-              const Expanded(
-                child: LoginScreenImage(),
-              ),
-              BlocProvider(
-                create: (context) => LoginBloc(
-                  authRepo: context.read<AuthRepository>(),
+    return BlocProvider<LoginBloc>(
+      create: (context) => _loginBloc,
+      child: Background(
+        child: SingleChildScrollView(
+          child: Responsive(
+            mobile: const MobileLoginScreen(),
+            desktop: Row(
+              children: [
+                const Expanded(
+                  child: LoginScreenImage(),
                 ),
-                child: Expanded(
+                Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -41,13 +55,16 @@ class LoginScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
+
+
 }
 
 class MobileLoginScreen extends StatelessWidget {

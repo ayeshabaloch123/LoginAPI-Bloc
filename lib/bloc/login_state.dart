@@ -1,29 +1,30 @@
-import 'package:login_bloc/bloc/form_submission_status.dart';
+import 'package:equatable/equatable.dart';
 
-class LoginState {
-  final String username;
-  bool get isValidUsername => username.length > 3;
 
+enum LoginStatus { initial, loading, success, error }
+
+class LoginState extends Equatable {
+  const LoginState({this.email = '', this.password = '', this.message = '', this.loginStatus = LoginStatus.initial});
+
+  final String email;
   final String password;
-  bool get isValidPassword => password.length > 6;
-
-  final FormSubmissionStatus formStatus;
-
-  LoginState({
-    this.username = '',
-    this.password = '',
-    this.formStatus = const InitialFormStatus(),
-  });
+  final String message;
+  final LoginStatus loginStatus;
 
   LoginState copyWith({
-    String? username,
+    String? email,
     String? password,
-    FormSubmissionStatus? formStatus,
+    String? message,
+    LoginStatus? loginStatus,
   }) {
     return LoginState(
-      username: username ?? this.username,
+      email: email ?? this.email,
       password: password ?? this.password,
-      formStatus: formStatus ?? this.formStatus,
+      message: message ?? this.message,
+      loginStatus: loginStatus ?? this.loginStatus,
     );
   }
+
+  @override
+  List<Object> get props => [email, password, message, loginStatus];
 }
